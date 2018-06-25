@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+    # -*- coding: utf-8 -*-
 # Copyright 2010 NaN Projectes de Programari Lliure, S.L.
 # Copyright 2014 Serv. Tec. Avanzados - Pedro M. Baeza
 # Copyright 2014 Oihane Crucelaegui - AvanzOSC
@@ -166,8 +166,17 @@ class QcInspection(models.Model):
         :param trigger_line: Trigger line instance
         :return: Inspection object
         """
-        inspection = self.create(self._prepare_inspection_header(
-            object_ref, trigger_line))
+        # Do check first if such inspections does already exists
+        inspection = self.search([
+            ('object_id', '=', object_ref and '%s,%s' % (object_ref._name, object_ref.id) or False),
+            ('test', '=', trigger_line.test.id),
+            ('user', '=', trigger_line.user.id),
+            ('auto_generated', '=', True),
+        ], limit=1)
+        # if no such inspection does exists - then create it
+        if not inspection:
+            inspection = self.create(self._prepare_inspection_header(
+                object_ref, trigger_line))
         inspection.set_test(trigger_line)
         return inspection
 
